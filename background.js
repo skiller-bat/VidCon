@@ -36,23 +36,27 @@ browser.commands.onCommand.addListener((command) => { // command: string
             break;
     }
     browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (tabs.length > 0) {
-            run(tabs[0]);
+        console.assert(tabs.length === 1);
+        if (tabs.length !== 1) {
+            return;
         }
+        run(tabs[0]);
     });
 });
 
 function run(tab) {
 
-    console.log(tab.url);
-
-    browser.tabs.executeScript({
-        code: `console.log(document.getElementsByTagName('video'))`
-    });
-
-    // if (tab.url.startsWith("https://..."))
-    console.log(`${xOffset}|${yOffset} @ ${scale}`);
-    browser.tabs.executeScript(/*tab.id,*/ { // tab.id is optional
-        code: `document.getElementsByTagName('video')[0].style.setProperty('transform', 'scale(${scale}) translate(${xOffset}px, ${yOffset}px)')`
+    browser.scripting.executeScript({
+        target: {
+            tabId: tab.id,
+        },
+        func: (scale, xOffset, yOffset) => {
+            console.log(`${xOffset}|${yOffset} @ ${scale}`);
+            console.log(window.location.href);
+            const video = document.getElementsByTagName('video')[0];
+            console.log(video);
+            video.style.setProperty('transform', `scale(${scale}) translate(${xOffset}px, ${yOffset}px)`)
+        },
+        args: [scale, xOffset, yOffset]
     });
 }
