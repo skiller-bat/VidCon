@@ -1,0 +1,7 @@
+1. listen for UI
+
+2. check site - TODO
+
+3. get video
+
+4. apply CSS

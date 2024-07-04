@@ -1,0 +1,55 @@
+{
+  "manifest_version": 2,
+  "name": "VidCon",
+  "version": "1.0",
+  "description": "Control Videos - Scale & Translate",
+  "permissions": [
+    "activeTab"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+
+  "commands": {
+    "move-right": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Right"
+      }
+    },
+    "move-left": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Left"
+      }
+    },
+    "move-up": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Up"
+      }
+    },
+    "move-down": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Down"
+      }
+    },
+    "scale-up": {
+      "suggested_key": {
+        "default": "Ctrl+Insert"
+      }
+    },
+    "scale-down": {
+      "suggested_key": {
+        "default": "Ctrl+Delete"
+      }
+    },
+    "reset": {
+      "suggested_key": {
+        "default": "Ctrl+Home"
+      }
+    },
+    "unknown": {
+      "suggested_key": {
+        "default": "Ctrl+End"
+      }
+    }
+  }
+}
