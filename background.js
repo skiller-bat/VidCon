@@ -2,7 +2,7 @@
 let scale = 1
 let xOffset = 0
 let yOffset = 0
-// TODO: tabId -> translationData: Map<number, {}>
+// TODO: tabId -> transformationData: Map<number, {}>
 
 browser.commands.onCommand.addListener((command) => { // command: string
     switch (command) {
