@@ -5,7 +5,8 @@
   "description": "Control Videos - Scale & Translate",
   "permissions": [
     "scripting",
-    "activeTab"
+    "activeTab",
+    "storage"
   ],
   "background": {
     "scripts": ["background.js"]

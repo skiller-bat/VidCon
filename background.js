@@ -1,55 +1,22 @@
+browser.commands.onCommand.addListener(command => {
 
-let scale = 1
-let xOffset = 0
-let yOffset = 0
-// TODO: tabId -> transformationData: Map<number, {}>
-
-browser.commands.onCommand.addListener((command) => { // command: string
-    switch (command) {
-        case 'move-right':
-            xOffset += 10
-            break
-        case 'move-left':
-            xOffset -= 10
-            break
-        case 'move-up':
-            yOffset -= 10
-            break
-        case 'move-down':
-            yOffset += 10
-            break
-        case 'scale-up':
-            scale += 0.05
-            break
-        case 'scale-down':
-            scale -= 0.05
-            break
-        case 'reset':
-            scale = 1
-            xOffset = 0
-            yOffset = 0
-            break
-        case 'unknown':
-            scale = Math.random() + 0.5
-            xOffset = (Math.random() - 0.5) * 500
-            yOffset = (Math.random() - 0.5) * 500
-            break
-    }
-
-    browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        console.assert(tabs.length === 1)
-        if (tabs.length !== 1) {
-            return
-        }
-        run(tabs[0])
+    getActiveTab().then(tab => {
+        getTabData(tab.id).then(data => {
+            if (!data) {
+                data = { scale: 1, xOffset: 0, yOffset: 0 }
+            }
+            updateData(data, command)
+            browser.storage.session.set({ [tab.id]: data })
+            injectScript(tab.id, data)
+        })
     })
 })
 
-function run(tab) {
+function injectScript(tabId, data) {
 
     browser.scripting.executeScript({
         target: {
-            tabId: tab.id,
+            tabId: tabId,
         },
         func: (scale, xOffset, yOffset) => {
 
@@ -65,6 +32,55 @@ function run(tab) {
             }
             video.style.setProperty('transform', `scale(${scale}) translate(${xOffset}px, ${yOffset}px)`)
         },
-        args: [scale, xOffset, yOffset]
+        args: Object.values(data)
     })
 }
+
+function getActiveTab() {
+    return browser.tabs.query({ active: true, currentWindow: true })
+        .then(tabs => {
+            console.assert(tabs.length === 1)
+            return tabs[0]
+        })
+}
+
+async function getTabData(tabId) {
+    return browser.storage.session.get(tabId.toString())
+        .then(x => {
+            return x[tabId]
+        })
+}
+
+function updateData(data, command) {
+    switch (command) {
+        case 'move-right':
+            data.xOffset += 10
+            break
+        case 'move-left':
+            data.xOffset -= 10
+            break
+        case 'move-up':
+            data.yOffset -= 10
+            break
+        case 'move-down':
+            data.yOffset += 10
+            break
+        case 'scale-up':
+            data.scale += 0.05
+            break
+        case 'scale-down':
+            data.scale -= 0.05
+            break
+        case 'reset':
+            data.scale = 1
+            data.xOffset = 0
+            data.yOffset = 0
+            break
+        case 'unknown':
+            data.scale = Math.random() + 0.5
+            data.xOffset = (Math.random() - 0.5) * 500
+            data.yOffset = (Math.random() - 0.5) * 500
+            break
+    }
+}
+
