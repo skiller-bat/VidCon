@@ -1,16 +1,35 @@
 browser.commands.onCommand.addListener(command => {
 
     getActiveTab().then(tab => {
-        getTabData(tab.id).then(data => {
-            if (!data) {
-                data = { scale: 1, xOffset: 0, yOffset: 0 }
-            }
-            updateData(data, command)
-            browser.storage.session.set({ [tab.id]: data })
-            injectScript(tab.id, data)
+        getTabData(tab.id).then(oldData => {
+            const newData = updateData(oldData, command)
+            injectStyle(tab.id, newData).then(() => {
+                if (oldData) {
+                    removeStyle(tab.id, oldData)
+                }
+            })
+            browser.storage.session.set({ [tab.id]: newData })
         })
     })
 })
+
+function injectStyle(tabId, data) {
+    return browser.scripting.insertCSS({
+        target: {
+            tabId: tabId
+        },
+        css: `video { transform: scale(${data.scale}) translate(${data.xOffset}px, ${data.yOffset}px); }`
+    })
+}
+
+function removeStyle(tabId, data) {
+    return browser.scripting.removeCSS({
+        target: {
+            tabId: tabId
+        },
+        css: `video { transform: scale(${data.scale}) translate(${data.xOffset}px, ${data.yOffset}px); }`
+    })
+}
 
 function injectScript(tabId, data) {
 
@@ -52,35 +71,37 @@ async function getTabData(tabId) {
 }
 
 function updateData(data, command) {
+    let newData = data ? structuredClone(data) : { scale: 1, xOffset: 0, yOffset: 0 }
+
     switch (command) {
         case 'move-right':
-            data.xOffset += 10
+            newData.xOffset += 10
             break
         case 'move-left':
-            data.xOffset -= 10
+            newData.xOffset -= 10
             break
         case 'move-up':
-            data.yOffset -= 10
+            newData.yOffset -= 10
             break
         case 'move-down':
-            data.yOffset += 10
+            newData.yOffset += 10
             break
         case 'scale-up':
-            data.scale += 0.05
+            newData.scale += 0.05
             break
         case 'scale-down':
-            data.scale -= 0.05
+            newData.scale -= 0.05
             break
         case 'reset':
-            data.scale = 1
-            data.xOffset = 0
-            data.yOffset = 0
+            newData.scale = 1
+            newData.xOffset = 0
+            newData.yOffset = 0
             break
         case 'unknown':
-            data.scale = Math.random() + 0.5
-            data.xOffset = (Math.random() - 0.5) * 500
-            data.yOffset = (Math.random() - 0.5) * 500
+            newData.scale = Math.random() + 0.5
+            newData.xOffset = (Math.random() - 0.5) * 500
+            newData.yOffset = (Math.random() - 0.5) * 500
             break
     }
+    return newData
 }
-
