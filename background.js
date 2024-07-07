@@ -15,20 +15,25 @@ browser.commands.onCommand.addListener(command => {
 
 function injectStyle(tabId, data) {
     return browser.scripting.insertCSS({
-        target: {
-            tabId: tabId
-        },
-        css: `video { transform: scale(${data.scale}) translate(${data.xOffset}px, ${data.yOffset}px); }`
+        target: { tabId: tabId },
+        css: getCss(data)
     })
 }
 
 function removeStyle(tabId, data) {
     return browser.scripting.removeCSS({
-        target: {
-            tabId: tabId
-        },
-        css: `video { transform: scale(${data.scale}) translate(${data.xOffset}px, ${data.yOffset}px); }`
+        target: { tabId: tabId },
+        css: getCss(data)
     })
+}
+
+function getCss(data) {
+    return `
+        video {
+            transform: scale(${data.scale}) translate(${data.xOffset}px, ${data.yOffset}px);
+            transition: transform 0.75s ease-out;
+        }
+    `
 }
 
 function injectScript(tabId, data) {
@@ -75,16 +80,16 @@ function updateData(data, command) {
 
     switch (command) {
         case 'move-right':
-            newData.xOffset += 10
+            newData.xOffset += 25
             break
         case 'move-left':
-            newData.xOffset -= 10
+            newData.xOffset -= 25
             break
         case 'move-up':
-            newData.yOffset -= 10
+            newData.yOffset -= 25
             break
         case 'move-down':
-            newData.yOffset += 10
+            newData.yOffset += 25
             break
         case 'scale-up':
             newData.scale += 0.05
